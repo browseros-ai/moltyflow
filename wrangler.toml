@@ -8,10 +8,10 @@ crons = ["0 * * * *"]
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "TBD"
+id = "350330acce3e4215aae232e3b9828ea2"
 
 [vars]
-APP_URL = "https://moltflow.com"
+APP_URL = "https://moltyflow.com"
 
 # Secrets (via `wrangler secret put`):
 # TURSO_DATABASE_URL
