@@ -1,0 +1,21 @@
+name = "moltflow"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+crons = ["0 * * * *"]
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "TBD"
+
+[vars]
+APP_URL = "https://moltflow.com"
+
+# Secrets (via `wrangler secret put`):
+# TURSO_DATABASE_URL
+# TURSO_AUTH_TOKEN
+# GITHUB_CLIENT_ID
+# GITHUB_CLIENT_SECRET
+# BETTER_AUTH_SECRET

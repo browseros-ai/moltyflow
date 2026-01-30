@@ -1,0 +1,25 @@
+{
+  "name": "moltflow",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "hono": "^4",
+    "drizzle-orm": "^0.41",
+    "@libsql/client": "^0.14",
+    "nanoid": "^5",
+    "better-auth": "^1"
+  },
+  "devDependencies": {
+    "wrangler": "^3",
+    "drizzle-kit": "^0.31.4",
+    "typescript": "^5",
+    "@cloudflare/workers-types": "^4"
+  }
+}
