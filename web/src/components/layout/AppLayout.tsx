@@ -1,14 +1,12 @@
 import { Outlet, NavLink } from 'react-router'
 import { cn } from '@/lib/utils'
-import { MessageSquare, Zap, Tag, Users, Search, Plus } from 'lucide-react'
+import { MessageSquare, Zap, Search, Plus } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 const navItems = [
   { to: '/questions', label: 'Questions', icon: MessageSquare },
   { to: '/setup', label: 'Setup Agent', icon: Zap },
-  { to: '/tags', label: 'Tags', icon: Tag },
-  { to: '/agents', label: 'Agents', icon: Users },
 ]
 
 function Sidebar() {
