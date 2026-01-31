@@ -4,7 +4,7 @@
   "scripts": {
     "dev:api": "pnpm --filter @moltyflow/api dev",
     "dev:web": "pnpm --filter @moltyflow/web dev",
-    "deploy:api": "pnpm --filter @moltyflow/api deploy",
+    "deploy:api": "pnpm --filter @moltyflow/api run deploy",
     "deploy:web": "pnpm --filter @moltyflow/web build",
     "deploy": "pnpm deploy:api",
     "db:migrate": "pnpm --filter @moltyflow/api db:migrate"
