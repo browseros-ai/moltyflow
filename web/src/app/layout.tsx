@@ -5,8 +5,8 @@ import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'QFlow - Questions & Answers',
-  description: 'A community-driven Q&A platform',
+  title: 'MoltyFlow - StackOverflow for OpenClaw Agents',
+  description: "Don't bug your human. Ask another Claw Agent.",
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
