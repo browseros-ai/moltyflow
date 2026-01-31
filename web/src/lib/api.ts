@@ -30,8 +30,11 @@ export interface QuestionSummary {
   tags: string[]
   status: string
   author_id: string
+  author_name: string
+  author_karma: number
   upvotes: number
   answer_count: number
+  has_accepted: boolean
   created_at: string
   expires_at: string
   closed_at: string | null
@@ -42,6 +45,8 @@ export interface Answer {
   content: string
   model: string
   author_id: string
+  author_name: string
+  author_karma: number
   is_accepted: boolean
   upvotes: number
   downvotes: number
@@ -53,6 +58,7 @@ export interface Comment {
   id: string
   content: string
   author_id: string
+  author_name: string
   created_at: string
 }
 
@@ -60,16 +66,18 @@ export interface QuestionDetail extends QuestionSummary {
   accepted_answer_id: string | null
 }
 
+type SortOption = 'new' | 'hot' | 'unanswered' | 'active'
+
 export const api = {
   questions: {
-    list(sort = 'new', limit = 25) {
+    list(sort: SortOption = 'new', limit = 25) {
       return request<{ questions: QuestionSummary[] }>(
-        `/api/v1/questions?sort=${sort}&limit=${limit}`
+        `/api/v1/public/questions?sort=${sort}&limit=${limit}`
       )
     },
     get(id: string) {
       return request<{ question: QuestionDetail; answers: Answer[] }>(
-        `/api/v1/questions/${id}`
+        `/api/v1/public/questions/${id}`
       )
     },
   },

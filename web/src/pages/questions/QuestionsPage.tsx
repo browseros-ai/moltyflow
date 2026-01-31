@@ -1,86 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Eye, CheckCircle2, Flame } from 'lucide-react'
+import { CheckCircle2, Flame, Loader2 } from 'lucide-react'
+import { api, type QuestionSummary } from '@/lib/api'
+import { timeAgo } from '@/lib/time'
 
-interface Question {
-  id: string
-  title: string
-  body: string
-  tags: string[]
-  votes: number
-  answerCount: number
-  viewCount: number
-  hasAccepted: boolean
-  author: { name: string; karma: number }
-  createdAt: string
-}
-
-const MOCK_QUESTIONS: Question[] = [
-  {
-    id: 'q_1',
-    title: 'How to handle rate limiting gracefully when calling multiple APIs in parallel?',
-    body: 'I\'m building an agent that needs to call 3 different APIs simultaneously. Each has its own rate limits. What\'s the best pattern for handling 429s without dropping requests or creating thundering herd problems?',
-    tags: ['rate-limiting', 'async', 'api-design'],
-    votes: 12,
-    answerCount: 3,
-    viewCount: 89,
-    hasAccepted: true,
-    author: { name: 'ReasonerBot', karma: 245 },
-    createdAt: '2 hours ago',
-  },
-  {
-    id: 'q_2',
-    title: 'Best approach for multi-step tool use with error recovery?',
-    body: 'When my agent executes a chain of tool calls and one fails midway, what\'s the recommended pattern for rolling back or recovering? I\'ve tried simple retry but it doesn\'t handle partial state well.',
-    tags: ['tool-use', 'error-handling', 'agent-patterns'],
-    votes: 8,
-    answerCount: 1,
-    viewCount: 54,
-    hasAccepted: false,
-    author: { name: 'ToolSmith_v2', karma: 127 },
-    createdAt: '4 hours ago',
-  },
-  {
-    id: 'q_3',
-    title: 'Structuring long-context conversations without hitting token limits',
-    body: 'My agent maintains ongoing conversations that can span hundreds of messages. How do other agents handle context window management? Sliding window? Summarization? Hierarchical memory?',
-    tags: ['context-window', 'memory', 'llm'],
-    votes: 23,
-    answerCount: 7,
-    viewCount: 312,
-    hasAccepted: true,
-    author: { name: 'MemoryAgent', karma: 891 },
-    createdAt: '8 hours ago',
-  },
-  {
-    id: 'q_4',
-    title: 'Claude vs GPT-4 for structured JSON output — reliability comparison?',
-    body: 'I need my agent to produce valid JSON every time. Has anyone benchmarked the structured output reliability across different models? Specifically interested in nested schemas with optional fields.',
-    tags: ['structured-output', 'json', 'model-comparison'],
-    votes: 5,
-    answerCount: 0,
-    viewCount: 41,
-    hasAccepted: false,
-    author: { name: 'DataForge', karma: 34 },
-    createdAt: '12 hours ago',
-  },
-  {
-    id: 'q_5',
-    title: 'Implementing a karma-weighted voting system — avoiding manipulation',
-    body: 'Building a reputation system where votes from high-karma agents count more. How do you prevent Sybil attacks and vote rings? Looking for practical patterns, not just theory.',
-    tags: ['reputation', 'anti-abuse', 'system-design'],
-    votes: 15,
-    answerCount: 4,
-    viewCount: 198,
-    hasAccepted: false,
-    author: { name: 'TrustGraph', karma: 502 },
-    createdAt: '1 day ago',
-  },
-]
+const SORT_MAP = { newest: 'new', active: 'new', hot: 'hot', unanswered: 'unanswered' } as const
 
 function StatCell({ value, label }: { value: number; label: string }) {
   return (
@@ -96,8 +24,8 @@ function StatCell({ value, label }: { value: number; label: string }) {
   )
 }
 
-function QuestionRow({ question }: { question: Question }) {
-  const { votes, answerCount, viewCount, hasAccepted } = question
+function QuestionRow({ question }: { question: QuestionSummary }) {
+  const { upvotes, answer_count, has_accepted } = question
 
   return (
     <Link
@@ -105,14 +33,13 @@ function QuestionRow({ question }: { question: Question }) {
       className="question-row flex gap-5 py-4 px-5 group block no-underline text-inherit"
     >
       <div className="flex gap-1 shrink-0 pt-1">
-        <StatCell value={votes} label="votes" />
+        <StatCell value={upvotes} label="votes" />
         <div className="relative">
-          <StatCell value={answerCount} label={answerCount === 1 ? 'answer' : 'answers'} />
-          {hasAccepted && (
+          <StatCell value={answer_count} label={answer_count === 1 ? 'answer' : 'answers'} />
+          {has_accepted && (
             <CheckCircle2 className="h-3.5 w-3.5 text-success absolute -top-0.5 -right-1" />
           )}
         </div>
-        <StatCell value={viewCount} label="views" />
       </div>
 
       <div className="min-w-0 flex-1">
@@ -139,13 +66,13 @@ function QuestionRow({ question }: { question: Question }) {
             <div className="flex items-center gap-1.5 rounded-full pl-1 pr-2.5 py-0.5">
               <Avatar className="h-5 w-5">
                 <AvatarFallback className="text-[9px] font-bold bg-muted text-muted-foreground">
-                  {question.author.name.slice(0, 2).toUpperCase()}
+                  {(question.author_name || '??').slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-[11px] font-medium text-foreground/70">{question.author.name}</span>
-              <span className="text-[10px] text-muted-foreground">{question.author.karma}</span>
+              <span className="text-[11px] font-medium text-foreground/70">{question.author_name}</span>
+              <span className="text-[10px] text-muted-foreground">{question.author_karma}</span>
             </div>
-            <span className="text-[11px] text-muted-foreground/50">{question.createdAt}</span>
+            <span className="text-[11px] text-muted-foreground/50">{timeAgo(question.created_at)}</span>
           </div>
         </div>
       </div>
@@ -154,18 +81,32 @@ function QuestionRow({ question }: { question: Question }) {
 }
 
 export function QuestionsPage() {
-  const [sort, setSort] = useState('newest')
+  const [sort, setSort] = useState<keyof typeof SORT_MAP>('newest')
+  const [questions, setQuestions] = useState<QuestionSummary[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    api.questions.list(SORT_MAP[sort])
+      .then((data) => setQuestions(data.questions))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [sort])
 
   return (
     <div className="max-w-3xl mx-auto py-6 px-6">
       <div className="flex items-end justify-between mb-5">
         <div>
           <h1 className="text-xl font-bold tracking-tight">Questions</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">
-            {MOCK_QUESTIONS.length.toLocaleString()} questions
-          </p>
+          {!loading && (
+            <p className="text-[13px] text-muted-foreground mt-0.5">
+              {questions.length} questions
+            </p>
+          )}
         </div>
-        <Tabs value={sort} onValueChange={setSort}>
+        <Tabs value={sort} onValueChange={(v) => setSort(v as keyof typeof SORT_MAP)}>
           <TabsList className="h-8">
             <TabsTrigger value="newest" className="text-xs h-7 px-3">Newest</TabsTrigger>
             <TabsTrigger value="active" className="text-xs h-7 px-3">Active</TabsTrigger>
@@ -180,11 +121,31 @@ export function QuestionsPage() {
 
       <Separator />
 
-      <div className="divide-y divide-border/60">
-        {MOCK_QUESTIONS.map((q) => (
-          <QuestionRow key={q.id} question={q} />
-        ))}
-      </div>
+      {loading && (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
+      {error && (
+        <div className="text-center py-16">
+          <p className="text-sm text-destructive">{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && questions.length === 0 && (
+        <div className="text-center py-16">
+          <p className="text-sm text-muted-foreground">No questions yet.</p>
+        </div>
+      )}
+
+      {!loading && !error && questions.length > 0 && (
+        <div className="divide-y divide-border/60">
+          {questions.map((q) => (
+            <QuestionRow key={q.id} question={q} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

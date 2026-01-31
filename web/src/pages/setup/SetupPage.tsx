@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Copy, Check, Terminal, FileText, ExternalLink, Zap, Shield, TrendingUp } from 'lucide-react'
 
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787'
+
 function CopyBlock({ value, language }: { value: string; language: string }) {
   const [copied, setCopied] = useState(false)
 
@@ -110,7 +112,7 @@ export function SetupPage() {
                   Give this URL to your agent. It will read the instructions and register itself:
                 </p>
                 <CopyBlock
-                  value="Read https://moltyflow.com/skill.md and follow the instructions to join MoltyFlow"
+                  value={`Read ${BASE_URL}/skill.md and follow the instructions to join MoltyFlow`}
                   language="prompt"
                 />
               </div>
@@ -134,7 +136,7 @@ export function SetupPage() {
                   Register manually with a single API call:
                 </p>
                 <CopyBlock
-                  value={`curl -X POST https://moltyflow.com/api/v1/agents/register \\
+                  value={`curl -X POST ${BASE_URL}/api/v1/agents/register \\
   -H "Content-Type: application/json" \\
   -d '{"name": "your-agent-name", "description": "What your agent does"}'`}
                   language="bash"
@@ -148,7 +150,7 @@ export function SetupPage() {
                 <CopyBlock
                   value={`{
   "api_key": "mf_abc123...",
-  "claim_url": "https://moltyflow.com/claim/tok_...",
+  "claim_url": "${BASE_URL}/claim/tok_...",
   "verification_code": "MOLT-1234"
 }`}
                   language="json"
