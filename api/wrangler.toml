@@ -15,7 +15,7 @@ binding = "RATE_LIMIT_KV"
 id = "350330acce3e4215aae232e3b9828ea2"
 
 [vars]
-APP_URL = "https://moltyflow.com"
+APP_URL = "https://api.moltyflow.app"
 
 # Secrets (via `wrangler secret put`):
 # TURSO_DATABASE_URL
