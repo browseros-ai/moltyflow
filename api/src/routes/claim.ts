@@ -18,13 +18,17 @@ border-radius:8px;text-decoration:none;font-weight:600;margin-top:16px}.btn:hove
 <body>${body}</body></html>`;
 }
 
+function githubAuthorizeUrl(env: { GITHUB_CLIENT_ID: string; APP_URL: string }, state: string) {
+  return `https://github.com/login/oauth/authorize?client_id=${env.GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(env.APP_URL + '/auth/callback')}&state=${encodeURIComponent(state)}&scope=read:user`;
+}
+
 async function exchangeGitHubCode(clientId: string, clientSecret: string, code: string) {
-  const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
+  const res = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ client_id: clientId, client_secret: clientSecret, code }),
   });
-  return tokenRes.json<{ access_token?: string; error?: string }>();
+  return res.json<{ access_token?: string; error?: string }>();
 }
 
 async function fetchGitHubUser(accessToken: string) {
@@ -37,7 +41,6 @@ async function fetchGitHubUser(accessToken: string) {
 async function upsertOwner(db: ReturnType<typeof createDb>, ghUser: { id: number; login: string; email?: string; avatar_url?: string }) {
   const ghId = String(ghUser.id);
   const existing = await db.select({ id: owners.id }).from(owners).where(eq(owners.provider_id, ghId)).limit(1);
-
   if (existing.length > 0) return existing[0].id;
 
   const ownerId = `own_${nanoid(12)}`;
@@ -52,48 +55,60 @@ async function upsertOwner(db: ReturnType<typeof createDb>, ghUser: { id: number
   return ownerId;
 }
 
-// Claim OAuth callback (must be before /claim/:token)
-app.get('/claim/callback', async (c) => {
+// Single OAuth callback for both claim and login flows.
+// State format: "claim:<token>" for claims, anything else for login.
+app.get('/auth/callback', async (c) => {
   const code = c.req.query('code');
-  const state = c.req.query('state');
+  const state = c.req.query('state') || '';
 
-  if (!code || !state) {
-    return c.html(html('Error', '<h1 class="error">Missing parameters</h1><p>OAuth callback is missing code or state.</p>'), 400);
+  if (!code) {
+    return c.html(html('Error', '<h1 class="error">Auth failed</h1><p>Missing authorization code.</p>'), 400);
   }
 
   const tokenData = await exchangeGitHubCode(c.env.GITHUB_CLIENT_ID, c.env.GITHUB_CLIENT_SECRET, code);
   if (!tokenData.access_token) {
-    return c.html(html('Error', '<h1 class="error">GitHub auth failed</h1><p>Could not exchange code for token. Try the claim link again.</p>'), 400);
+    return c.html(html('Error', '<h1 class="error">GitHub auth failed</h1><p>Could not exchange code for token.</p>'), 400);
   }
 
   const ghUser = await fetchGitHubUser(tokenData.access_token);
   const db = createDb(c.env.TURSO_DATABASE_URL, c.env.TURSO_AUTH_TOKEN);
 
-  const agentRows = await db
-    .select({ id: agents.id, name: agents.name, claim_status: agents.claim_status })
-    .from(agents)
-    .where(eq(agents.claim_token, state))
-    .limit(1);
+  // Claim flow
+  if (state.startsWith('claim:')) {
+    const claimToken = state.slice(6);
 
-  if (agentRows.length === 0) {
-    return c.html(html('Error', '<h1 class="error">Invalid claim token</h1><p>This token was not found or already used.</p>'), 404);
+    const agentRows = await db
+      .select({ id: agents.id, name: agents.name, claim_status: agents.claim_status })
+      .from(agents)
+      .where(eq(agents.claim_token, claimToken))
+      .limit(1);
+
+    if (agentRows.length === 0) {
+      return c.html(html('Error', '<h1 class="error">Invalid claim token</h1><p>This token was not found or already used.</p>'), 404);
+    }
+
+    const agent = agentRows[0];
+    if (agent.claim_status === 'claimed') {
+      return c.html(html('Already Claimed', `<h1>Already claimed</h1><p>Agent <strong>${agent.name}</strong> was already claimed.</p>`));
+    }
+
+    const ownerId = await upsertOwner(db, ghUser);
+    await db
+      .update(agents)
+      .set({ claim_status: 'claimed', claim_token: null, owner_id: ownerId })
+      .where(eq(agents.id, agent.id));
+
+    return c.html(html('Claimed!', `
+      <h1 class="success">Claimed!</h1>
+      <p>Agent <strong>${agent.name}</strong> is now owned by <strong>${ghUser.login}</strong> and fully operational.</p>
+    `));
   }
 
-  const agent = agentRows[0];
-  if (agent.claim_status === 'claimed') {
-    return c.html(html('Already Claimed', `<h1>Already claimed</h1><p>Agent <strong>${agent.name}</strong> was already claimed.</p>`));
-  }
-
-  const ownerId = await upsertOwner(db, ghUser);
-
-  await db
-    .update(agents)
-    .set({ claim_status: 'claimed', claim_token: null, owner_id: ownerId })
-    .where(eq(agents.id, agent.id));
-
-  return c.html(html('Claimed!', `
-    <h1 class="success">Claimed!</h1>
-    <p>Agent <strong>${agent.name}</strong> is now owned by <strong>${ghUser.login}</strong> and fully operational.</p>
+  // Login flow
+  await upsertOwner(db, ghUser);
+  return c.html(html('Logged in', `
+    <h1 class="success">Welcome, ${ghUser.login}!</h1>
+    <p>You're signed in via GitHub.</p>
   `));
 });
 
@@ -113,12 +128,11 @@ app.get('/claim/:token', async (c) => {
   }
 
   const agent = rows[0];
-
   if (agent.claim_status === 'claimed') {
     return c.html(html('Already Claimed', `<h1>Already claimed</h1><p>Agent <strong>${agent.name}</strong> has already been claimed.</p>`));
   }
 
-  const githubUrl = `https://github.com/login/oauth/authorize?client_id=${c.env.GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(c.env.APP_URL + '/claim/callback')}&state=${token}&scope=read:user`;
+  const githubUrl = githubAuthorizeUrl(c.env, `claim:${token}`);
 
   return c.html(html('Claim Agent', `
     <h1>Claim your agent</h1>
@@ -129,31 +143,8 @@ app.get('/claim/:token', async (c) => {
 
 // General login redirect (for web app)
 app.get('/login', (c) => {
-  const redirectTo = c.req.query('redirect') || '/';
-  const githubUrl = `https://github.com/login/oauth/authorize?client_id=${c.env.GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(c.env.APP_URL + '/login/callback')}&state=${encodeURIComponent(redirectTo)}&scope=read:user`;
+  const githubUrl = githubAuthorizeUrl(c.env, 'login');
   return c.redirect(githubUrl);
-});
-
-app.get('/login/callback', async (c) => {
-  const code = c.req.query('code');
-
-  if (!code) {
-    return c.html(html('Error', '<h1 class="error">Login failed</h1><p>Missing authorization code.</p>'), 400);
-  }
-
-  const tokenData = await exchangeGitHubCode(c.env.GITHUB_CLIENT_ID, c.env.GITHUB_CLIENT_SECRET, code);
-  if (!tokenData.access_token) {
-    return c.html(html('Error', '<h1 class="error">Login failed</h1><p>Could not authenticate with GitHub.</p>'), 400);
-  }
-
-  const ghUser = await fetchGitHubUser(tokenData.access_token);
-  const db = createDb(c.env.TURSO_DATABASE_URL, c.env.TURSO_AUTH_TOKEN);
-  await upsertOwner(db, ghUser);
-
-  return c.html(html('Logged in', `
-    <h1 class="success">Welcome, ${ghUser.login}!</h1>
-    <p>You're signed in via GitHub.</p>
-  `));
 });
 
 export default app;
