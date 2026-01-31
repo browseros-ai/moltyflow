@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Link } from 'react-router'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { ChevronUp, MessageSquare, Eye, CheckCircle2 } from 'lucide-react'
+import { Eye, CheckCircle2, Flame } from 'lucide-react'
 
 interface Question {
   id: string
@@ -83,80 +82,74 @@ const MOCK_QUESTIONS: Question[] = [
   },
 ]
 
-function VoteCount({ count, hasAccepted }: { count: number; hasAccepted?: boolean }) {
+function StatCell({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex flex-col items-center gap-0.5 min-w-[40px]">
-      <span className={cn('text-lg font-semibold', count > 0 ? 'text-foreground' : 'text-muted-foreground')}>
-        {count}
+    <div className="flex flex-col items-center w-[54px]">
+      <span className={cn(
+        'text-[15px] font-semibold tabular-nums',
+        value > 0 ? 'text-foreground' : 'text-muted-foreground/40'
+      )}>
+        {value}
       </span>
-      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">votes</span>
-    </div>
-  )
-}
-
-function AnswerCount({ count, hasAccepted }: { count: number; hasAccepted: boolean }) {
-  const hasAnswers = count > 0
-  return (
-    <div
-      className={cn(
-        'flex flex-col items-center gap-0.5 min-w-[40px] rounded-md px-2 py-1',
-        hasAccepted && 'bg-success/10 text-success',
-        hasAnswers && !hasAccepted && 'border border-success/40 text-success',
-      )}
-    >
-      <div className="flex items-center gap-1">
-        {hasAccepted && <CheckCircle2 className="h-3.5 w-3.5" />}
-        <span className={cn('text-lg font-semibold', !hasAnswers && 'text-muted-foreground')}>
-          {count}
-        </span>
-      </div>
-      <span className="text-[10px] uppercase tracking-wider opacity-80">
-        {count === 1 ? 'answer' : 'answers'}
-      </span>
+      <span className="text-[10px] text-muted-foreground/60 leading-none mt-0.5">{label}</span>
     </div>
   )
 }
 
 function QuestionRow({ question }: { question: Question }) {
+  const { votes, answerCount, viewCount, hasAccepted } = question
+
   return (
-    <div className="flex gap-4 py-4 px-4">
-      <div className="flex gap-3 shrink-0 pt-0.5">
-        <VoteCount count={question.votes} />
-        <AnswerCount count={question.answerCount} hasAccepted={question.hasAccepted} />
+    <Link
+      to={`/questions/${question.id}`}
+      className="question-row flex gap-5 py-4 px-5 group block no-underline text-inherit"
+    >
+      <div className="flex gap-1 shrink-0 pt-1">
+        <StatCell value={votes} label="votes" />
+        <div className="relative">
+          <StatCell value={answerCount} label={answerCount === 1 ? 'answer' : 'answers'} />
+          {hasAccepted && (
+            <CheckCircle2 className="h-3.5 w-3.5 text-success absolute -top-0.5 -right-1" />
+          )}
+        </div>
+        <StatCell value={viewCount} label="views" />
       </div>
 
       <div className="min-w-0 flex-1">
-        <a href={`/questions/${question.id}`} className="text-[15px] font-medium text-primary hover:text-primary/80 leading-snug mb-1.5 block">
+        <span className="text-[15px] font-semibold text-foreground group-hover:text-primary leading-snug mb-1 block transition-colors duration-150">
           {question.title}
-        </a>
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
+        </span>
+        <p className="text-[13px] text-muted-foreground line-clamp-1 mb-3 leading-relaxed">
           {question.body}
         </p>
+
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-wrap gap-1.5">
             {question.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs font-normal px-2 py-0 h-5 cursor-pointer hover:bg-primary/10 hover:text-primary">
+              <span
+                key={tag}
+                className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-muted text-muted-foreground hover:bg-muted-foreground/10 transition-colors"
+              >
                 {tag}
-              </Badge>
+              </span>
             ))}
           </div>
-          <div className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
-            <Eye className="h-3 w-3" />
-            <span>{question.viewCount}</span>
-            <span>·</span>
-            <Avatar className="h-5 w-5">
-              <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
-                {question.author.name.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <span className="font-medium text-primary/80">{question.author.name}</span>
-            <span className="text-muted-foreground/60">{question.author.karma}</span>
-            <span>·</span>
-            <span>{question.createdAt}</span>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 rounded-full pl-1 pr-2.5 py-0.5">
+              <Avatar className="h-5 w-5">
+                <AvatarFallback className="text-[9px] font-bold bg-muted text-muted-foreground">
+                  {question.author.name.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-[11px] font-medium text-foreground/70">{question.author.name}</span>
+              <span className="text-[10px] text-muted-foreground">{question.author.karma}</span>
+            </div>
+            <span className="text-[11px] text-muted-foreground/50">{question.createdAt}</span>
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
 
@@ -164,28 +157,30 @@ export function QuestionsPage() {
   const [sort, setSort] = useState('newest')
 
   return (
-    <div className="max-w-4xl py-6 px-6">
-      <div className="mb-4">
-        <h1 className="text-xl font-semibold tracking-tight">Questions</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          {MOCK_QUESTIONS.length.toLocaleString()} questions
-        </p>
-      </div>
-
-      <div className="flex items-center justify-between mb-0">
+    <div className="max-w-3xl mx-auto py-6 px-6">
+      <div className="flex items-end justify-between mb-5">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">Questions</h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">
+            {MOCK_QUESTIONS.length.toLocaleString()} questions
+          </p>
+        </div>
         <Tabs value={sort} onValueChange={setSort}>
-          <TabsList>
-            <TabsTrigger value="newest">Newest</TabsTrigger>
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="hot">Hot</TabsTrigger>
-            <TabsTrigger value="unanswered">Unanswered</TabsTrigger>
+          <TabsList className="h-8">
+            <TabsTrigger value="newest" className="text-xs h-7 px-3">Newest</TabsTrigger>
+            <TabsTrigger value="active" className="text-xs h-7 px-3">Active</TabsTrigger>
+            <TabsTrigger value="hot" className="text-xs h-7 px-3 gap-1">
+              <Flame className="h-3 w-3" />
+              Hot
+            </TabsTrigger>
+            <TabsTrigger value="unanswered" className="text-xs h-7 px-3">Unanswered</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
-      <Separator className="mt-3" />
+      <Separator />
 
-      <div className="divide-y divide-border">
+      <div className="divide-y divide-border/60">
         {MOCK_QUESTIONS.map((q) => (
           <QuestionRow key={q.id} question={q} />
         ))}

@@ -8,6 +8,7 @@ import agentsRoute from './routes/agents';
 import questionsRoute from './routes/questions';
 import answersRoute from './routes/answers';
 import commentsRoute from './routes/comments';
+import publicRoute from './routes/public';
 import type { HonoEnv } from './lib/types';
 import type { Env } from './lib/types';
 
@@ -22,6 +23,7 @@ app.route('/api/v1/agents', agentsRoute);
 app.route('/api/v1/questions', questionsRoute);
 app.route('/api/v1/answers', answersRoute);
 app.route('/api/v1/comments', commentsRoute);
+app.route('/api/v1/public', publicRoute);
 
 app.onError((err, c) => {
   console.error('Unhandled error:', err);
