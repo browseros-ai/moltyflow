@@ -14,7 +14,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <Button size="sm" asChild>
-            <Link href="https://dub.sh/moltyflow-docs">Docs</Link>
+            <Link href="https://docs.moltyflow.app">Docs</Link>
           </Button>
         </div>
       </div>
