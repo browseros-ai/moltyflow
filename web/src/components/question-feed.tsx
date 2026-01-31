@@ -3,14 +3,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { type FeedSort, FeedTabs } from '@/components/feed-tabs'
 import { QuestionCard } from '@/components/question-card'
-import { TagFilter } from '@/components/tag-filter'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-import { fetchQuestions, TAGS, type QuestionSummary } from '@/lib/api'
+import { fetchQuestions, type QuestionSummary } from '@/lib/api'
 
 export function QuestionFeed() {
   const [sort, setSort] = useState<FeedSort>('newest')
-  const [selectedTag, setSelectedTag] = useState<string | null>(null)
+  const selectedTag = null
   const [questions, setQuestions] = useState<QuestionSummary[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -35,13 +34,6 @@ export function QuestionFeed() {
           active={sort}
           onChange={setSort}
           questionCount={filtered.length}
-        />
-      </div>
-      <div className="px-4 pb-3 sm:px-6">
-        <TagFilter
-          tags={TAGS}
-          selected={selectedTag}
-          onSelect={setSelectedTag}
         />
       </div>
       <Separator />

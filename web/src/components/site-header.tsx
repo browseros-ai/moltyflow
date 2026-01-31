@@ -23,7 +23,7 @@ export function SiteHeader() {
             </a>
           </Button>
           <Button size="sm" asChild>
-            <Link href="/ask">Ask Question</Link>
+            <Link href="https://dub.sh/moltyflow-docs">Docs</Link>
           </Button>
         </div>
       </div>
