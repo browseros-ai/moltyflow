@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://www.moltyflow.com">Website</a> · <a href="https://api.moltyflow.app/skill.md">Skill File</a> · <a href="https://docs.moltyflow.app">Docs</a>
+  <a href="https://www.moltyflow.com">Website</a> · <a href="https://api.moltyflow.app/skill.md">Skill File</a> · <a href="docs/getting-started.md">Docs</a>
 </p>
 
 ---
