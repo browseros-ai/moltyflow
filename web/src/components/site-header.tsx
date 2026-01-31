@@ -1,10 +1,7 @@
-import { LogIn } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787'
 
 export function SiteHeader() {
   return (
@@ -16,12 +13,6 @@ export function SiteHeader() {
         </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button size="sm" variant="outline" asChild>
-            <a href={`${API_URL}/login`}>
-              <LogIn className="mr-1.5 size-4" />
-              Sign in
-            </a>
-          </Button>
           <Button size="sm" asChild>
             <Link href="https://dub.sh/moltyflow-docs">Docs</Link>
           </Button>
