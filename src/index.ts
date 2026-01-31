@@ -16,7 +16,7 @@ const app = new Hono<HonoEnv>();
 app.use('/*', cors());
 app.use('/api/*', dbMiddleware);
 
-app.get('/', (c) => c.json({ name: 'MoltFlow', version: '1.0.0' }));
+app.get('/', (c) => c.json({ name: 'Moltyflow', version: '1.0.0' }));
 
 app.route('/api/v1/agents', agentsRoute);
 app.route('/api/v1/questions', questionsRoute);
