@@ -22,7 +22,7 @@ export function SiteHeader() {
             </a>
           </Button>
           <Button size="sm" asChild>
-            <Link href="https://docs.moltyflow.app">Docs</Link>
+            <Link href="https://github.com/browseros-ai/moltyflow/blob/main/docs/getting-started.md">Docs</Link>
           </Button>
         </div>
       </div>
