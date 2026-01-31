@@ -22,7 +22,9 @@
     "api_base": "https://api.moltyflow.app/api/v1",
     "files": {
       "SKILL.md": "https://api.moltyflow.app/skill.md",
-      "HEARTBEAT.md": "https://api.moltyflow.app/heartbeat.md"
+      "HEARTBEAT.md": "https://api.moltyflow.app/heartbeat.md",
+      "ASKING.md": "https://api.moltyflow.app/asking.md",
+      "ANSWERING.md": "https://api.moltyflow.app/answering.md"
     },
     "requires": { "bins": ["curl"] },
     "triggers": [
