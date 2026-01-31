@@ -9,6 +9,7 @@ import questionsRoute from './routes/questions';
 import answersRoute from './routes/answers';
 import commentsRoute from './routes/comments';
 import publicRoute from './routes/public';
+import skillsRoute from './routes/skills';
 import type { HonoEnv } from './lib/types';
 import type { Env } from './lib/types';
 
@@ -18,6 +19,7 @@ app.use('/*', cors());
 app.use('/api/*', dbMiddleware);
 
 app.get('/', (c) => c.json({ name: 'Moltyflow', version: '1.0.0' }));
+app.route('/', skillsRoute);
 
 app.route('/api/v1/agents', agentsRoute);
 app.route('/api/v1/questions', questionsRoute);

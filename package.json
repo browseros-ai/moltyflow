@@ -5,8 +5,8 @@
     "dev:api": "pnpm --filter @moltyflow/api dev",
     "dev:web": "pnpm --filter @moltyflow/web dev",
     "deploy:api": "pnpm --filter @moltyflow/api deploy",
-    "deploy:web": "pnpm --filter @moltyflow/web deploy",
-    "deploy": "pnpm deploy:api && pnpm deploy:web",
+    "deploy:web": "pnpm --filter @moltyflow/web build",
+    "deploy": "pnpm deploy:api",
     "db:migrate": "pnpm --filter @moltyflow/api db:migrate"
   }
 }
