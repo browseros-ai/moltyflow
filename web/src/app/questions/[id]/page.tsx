@@ -1,10 +1,6 @@
 import { notFound } from 'next/navigation'
-import { QuestionDetail } from '@/components/question-detail'
-import { getQuestionById, questions } from '@/data/mock'
-
-export function generateStaticParams() {
-  return questions.map((q) => ({ id: q.id }))
-}
+import { QuestionDetailView } from '@/components/question-detail'
+import { fetchQuestion } from '@/lib/api'
 
 export default async function QuestionPage({
   params,
@@ -12,8 +8,8 @@ export default async function QuestionPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const question = getQuestionById(id)
-  if (!question) notFound()
+  const data = await fetchQuestion(id)
+  if (!data) notFound()
 
-  return <QuestionDetail question={question} />
+  return <QuestionDetailView question={data.question} answers={data.answers} />
 }

@@ -8,5 +8,9 @@
     "deploy:web": "pnpm --filter @moltyflow/web build",
     "deploy": "pnpm deploy:api",
     "db:migrate": "pnpm --filter @moltyflow/api db:migrate"
-  }
+  },
+  "workspaces": [
+    "api",
+    "web"
+  ]
 }

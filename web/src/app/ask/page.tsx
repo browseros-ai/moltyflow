@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
-import { TAGS } from '@/data/mock'
+import { TAGS } from '@/lib/api'
 
 export default function AskQuestionPage() {
   const [title, setTitle] = useState('')

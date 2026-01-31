@@ -1,7 +1,7 @@
-import { Eye, MessageSquare } from 'lucide-react'
+import { MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
-import type { Question } from '@/data/mock'
+import type { QuestionSummary } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
 function timeAgo(dateStr: string): string {
@@ -26,6 +26,7 @@ function AuthorAvatar({ name }: { name: string }) {
     .map((n) => n[0])
     .join('')
     .slice(0, 2)
+    .toUpperCase()
   return (
     <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-[10px] text-primary">
       {initials}
@@ -33,41 +34,33 @@ function AuthorAvatar({ name }: { name: string }) {
   )
 }
 
-export function QuestionCard({ question }: { question: Question }) {
-  const hasAccepted = question.answers.some((a) => a.accepted)
-
+export function QuestionCard({ question }: { question: QuestionSummary }) {
   return (
     <div className="flex gap-4 border-border border-b px-4 py-4 transition-colors hover:bg-accent/30 sm:px-6">
-      {/* Stats column */}
       <div className="hidden shrink-0 flex-col items-end gap-1.5 text-xs sm:flex sm:w-[72px]">
         <span
           className={cn(
             'font-medium tabular-nums',
-            question.votes > 0 ? 'text-foreground' : 'text-muted-foreground',
+            question.upvotes > 0 ? 'text-foreground' : 'text-muted-foreground',
           )}
         >
-          {question.votes} votes
+          {question.upvotes} votes
         </span>
         <span
           className={cn(
             'inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 tabular-nums',
-            hasAccepted
+            question.has_accepted
               ? 'bg-green-600 text-white dark:bg-green-700'
-              : question.answers.length > 0
+              : question.answer_count > 0
                 ? 'border border-green-600 text-green-700 dark:border-green-500 dark:text-green-400'
                 : 'text-muted-foreground',
           )}
         >
-          {question.answers.length}{' '}
-          {question.answers.length === 1 ? 'answer' : 'answers'}
-        </span>
-        <span className="flex items-center gap-1 text-muted-foreground tabular-nums">
-          <Eye className="size-3" />
-          {question.views}
+          {question.answer_count}{' '}
+          {question.answer_count === 1 ? 'answer' : 'answers'}
         </span>
       </div>
 
-      {/* Content */}
       <div className="min-w-0 flex-1">
         <Link
           href={`/questions/${question.id}`}
@@ -76,11 +69,10 @@ export function QuestionCard({ question }: { question: Question }) {
           {question.title}
         </Link>
         <p className="mt-1 line-clamp-2 text-muted-foreground text-sm">
-          {question.excerpt}
+          {question.body}
         </p>
 
         <div className="mt-2.5 flex flex-wrap items-center gap-2">
-          {/* Tags */}
           <div className="flex flex-wrap gap-1.5">
             {question.tags.map((tag) => (
               <Badge
@@ -95,26 +87,24 @@ export function QuestionCard({ question }: { question: Question }) {
 
           <div className="flex-1" />
 
-          {/* Mobile stats */}
           <div className="flex items-center gap-3 text-muted-foreground text-xs sm:hidden">
-            <span className="tabular-nums">{question.votes} votes</span>
+            <span className="tabular-nums">{question.upvotes} votes</span>
             <span className="flex items-center gap-0.5 tabular-nums">
               <MessageSquare className="size-3" />
-              {question.answers.length}
+              {question.answer_count}
             </span>
           </div>
 
-          {/* Author + time */}
           <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
-            <AuthorAvatar name={question.author.name} />
+            <AuthorAvatar name={question.author_name} />
             <span className="font-medium text-foreground/80">
-              {question.author.name}
+              {question.author_name}
             </span>
             <span className="text-muted-foreground/60">
-              {question.author.reputation.toLocaleString()}
+              {question.author_karma.toLocaleString()}
             </span>
             <span>·</span>
-            <span>{timeAgo(question.createdAt)}</span>
+            <span>{timeAgo(question.created_at)}</span>
           </div>
         </div>
       </div>

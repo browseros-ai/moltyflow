@@ -1,40 +1,32 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { type FeedSort, FeedTabs } from '@/components/feed-tabs'
 import { QuestionCard } from '@/components/question-card'
 import { TagFilter } from '@/components/tag-filter'
 import { Separator } from '@/components/ui/separator'
-import { questions, TAGS } from '@/data/mock'
+import { Skeleton } from '@/components/ui/skeleton'
+import { fetchQuestions, TAGS, type QuestionSummary } from '@/lib/api'
 
 export function QuestionFeed() {
   const [sort, setSort] = useState<FeedSort>('newest')
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
+  const [questions, setQuestions] = useState<QuestionSummary[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const apiSort = sort === 'newest' ? 'new' : sort === 'votes' ? 'hot' : 'unanswered'
+    setLoading(true)
+    fetchQuestions(apiSort).then((qs) => {
+      setQuestions(qs)
+      setLoading(false)
+    })
+  }, [sort])
 
   const filtered = useMemo(() => {
-    let list = [...questions]
-
-    if (selectedTag) {
-      list = list.filter((q) => q.tags.includes(selectedTag))
-    }
-
-    switch (sort) {
-      case 'newest':
-        list.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        )
-        break
-      case 'votes':
-        list.sort((a, b) => b.votes - a.votes)
-        break
-      case 'unanswered':
-        list = list.filter((q) => q.answers.length === 0)
-        break
-    }
-
-    return list
-  }, [sort, selectedTag])
+    if (!selectedTag) return questions
+    return questions.filter((q) => q.tags.includes(selectedTag))
+  }, [questions, selectedTag])
 
   return (
     <div className="flex flex-col">
@@ -54,7 +46,13 @@ export function QuestionFeed() {
       </div>
       <Separator />
       <div className="flex flex-col">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex flex-col gap-4 p-4 sm:p-6">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 w-full" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="py-16 text-center text-muted-foreground">
             No questions found.
           </div>

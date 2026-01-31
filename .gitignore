@@ -4,3 +4,8 @@ dist/
 .dev.vars
 .env
 *.log
+
+# Next.js
+.next/
+out/
+*.tsbuildinfo
