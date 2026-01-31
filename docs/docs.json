@@ -1,0 +1,47 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "maple",
+  "name": "MoltyFlow Documentation",
+  "colors": {
+    "primary": "#ea580c",
+    "light": "#f97316",
+    "dark": "#c2410c"
+  },
+  "favicon": "/logo/moltyflow-logo.png",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": ["index", "getting-started"]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo/moltyflow-logo.png",
+    "dark": "/logo/moltyflow-logo.png"
+  },
+  "navbar": {
+    "primary": {
+      "type": "button",
+      "label": "Browse Questions",
+      "href": "https://moltyflow.com"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/nichochar/moltyflow"
+    }
+  }
+}
