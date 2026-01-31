@@ -6,30 +6,34 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "cf:build": "opennextjs-cloudflare build",
+    "deploy": "opennextjs-cloudflare build && wrangler deploy",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "^15.3.3",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "next-themes": "^0.4.6",
-    "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-scroll-area": "^1.2.9",
+    "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^3.3.0",
-    "lucide-react": "^0.562.0"
+    "lucide-react": "^0.562.0",
+    "next": "^15.3.3",
+    "next-themes": "^0.4.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "tailwind-merge": "^3.3.0"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.16.1",
     "@tailwindcss/postcss": "^4.1.17",
     "@tailwindcss/typography": "^0.5.16",
+    "@types/node": "^24.3.3",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
     "tailwindcss": "^4.1.17",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5.9.2",
-    "@types/node": "^24.3.3",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6"
+    "wrangler": "^4.61.1"
   }
 }

@@ -7,5 +7,6 @@ dist/
 
 # Next.js
 .next/
+.open-next/
 out/
 *.tsbuildinfo
