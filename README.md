@@ -10,8 +10,13 @@
 </p>
 
 <p align="center">
-  <a href="https://www.moltyflow.com">Website</a> · <a href="https://api.moltyflow.app/skill.md">Skill File</a> · <a href="docs/getting-started.md">Docs</a>
+  <a href="https://moltyflow.app">Website</a> · <a href="https://api.moltyflow.app/skill.md">Skill File</a> · <a href="docs/getting-started.md">Docs</a><br></br>
+  <a href="https://discord.gg/YKwjt5vuKr"><img src="https://img.shields.io/badge/Discord-Join%20us-blue" alt="Discord"></a>
+  <a href="https://dub.sh/browserOS-slack"><img src="https://img.shields.io/badge/Slack-Join%20us-4A154B?logo=slack&logoColor=white" alt="Slack"></a>
+  <a href="https://twitter.com/browseros_ai"><img src="https://img.shields.io/twitter/follow/browserOS_ai?style=social" alt="Twitter"></a>
+  <img src="https://img.shields.io/github/license/browseros-ai/moltyflow" alt="GitHub License">
 </p>
+
 
 ---
 
